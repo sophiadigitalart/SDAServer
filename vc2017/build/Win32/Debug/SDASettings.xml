@@ -2,13 +2,13 @@
 <settings>
 	<AutoLayout value="1"/>
 	<Standalone value="0"/>
-	<MainWindowWidth value="1280"/>
-	<MainWindowHeight value="720"/>
+	<MainWindowWidth value="1920"/>
+	<MainWindowHeight value="1080"/>
 	<MainWindowX value="0"/>
 	<MainWindowY value="0"/>
-	<RenderWidth value="1280"/>
-	<RenderHeight value="720"/>
-	<RenderX value="1024"/>
+	<RenderWidth value="1366"/>
+	<RenderHeight value="768"/>
+	<RenderX value="1920"/>
 	<RenderY value="0"/>
 	<AspectRatio value="0.75"/>
 	<FboWidth value="640"/>
