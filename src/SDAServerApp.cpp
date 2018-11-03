@@ -107,16 +107,22 @@ SDAServerApp::SDAServerApp()
 	mReceiver.setListener("/?/*",
 		[&](const osc::Message &message) {
 		if (message[3].string() == "HandR") {
-			/*CI_LOG_W(message.getAddress());
-			CI_LOG_W(message[0].flt());
-			CI_LOG_W(message[1].flt());
-			CI_LOG_W(message[2].flt());*/
 			float xHandR = message[0].flt();
 			float yHandR = message[1].flt();
-			mCurrentSquarePos = vec2(xHandR, yHandR) * vec2(getWindowSize()) + vec2(getWindowSize() / 2);
+			mCurrentSquarePos = vec2(xHandR * getWindowWidth() + getWindowWidth() / 2, yHandR * getWindowHeight() + getWindowHeight() / 2);
 			stringstream sParams;
-			sParams << "{\"params\" :[{\"name\":35,\"value\":" << toString(mCurrentSquarePos.x);
-			sParams << "},{\"name\":36,\"value\":" << toString(mCurrentSquarePos.y) << "}]}";
+			sParams << "{\"params\" :[{\"name\":110,\"value\":" << toString(xHandR);
+			sParams << "},{\"name\":111,\"value\":" << toString(yHandR) << "}]}";
+			mSDASession->wsWrite(sParams.str());
+			CI_LOG_W(sParams.str());
+		}
+		if (message[3].string() == "HandL") {
+			float xHandL = message[0].flt();
+			float yHandL = message[1].flt();
+			mCurrentCirclePos = vec2(xHandL * getWindowWidth() + getWindowWidth() / 2, yHandL * getWindowHeight() + getWindowHeight() / 2);
+			stringstream sParams;
+			sParams << "{\"params\" :[{\"name\":112,\"value\":" << toString(xHandL);
+			sParams << "},{\"name\":113,\"value\":" << toString(yHandL) << "}]}";
 			mSDASession->wsWrite(sParams.str());
 			CI_LOG_W(sParams.str());
 		}
