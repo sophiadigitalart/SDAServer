@@ -69,6 +69,15 @@
     <Filter Include="Blocks\OSC\src\cinder\osc">
       <UniqueIdentifier>{17947F30-F2F3-4F28-B4D3-A07D98AEDB34}</UniqueIdentifier>
     </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{781a5417-2257-4114-834b-98b3b141ca99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="release">
+      <UniqueIdentifier>{ef4bb387-6caf-423d-8fc3-eedfd6d8b81d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{7164d67b-6816-4712-9a76-e019626fe39a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\SDAServerApp.cpp">
@@ -261,5 +270,13 @@
     <ResourceCompile Include="Resources.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="build\Win32\Debug\SDASettings.xml">
+      <Filter>debug</Filter>
+    </Xml>
+    <Xml Include="build\Win32\Release\SDASettings.xml">
+      <Filter>release</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

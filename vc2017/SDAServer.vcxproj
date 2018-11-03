@@ -204,7 +204,10 @@
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Xml Include="build\Win32\Debug\SDASettings.xml" />
+    <Xml Include="build\Win32\Release\SDASettings.xml" />
+  </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />

@@ -80,20 +80,12 @@ private:
 	bool							mFadeInDelay;
 	SpoutOut 						mSpoutOut;
 
-	void midiListener(midi::Message msg);
-
-	midi::Input mMidiIn;
-
-	float sliderValue;
-	string status;
-	int notes[128];
-	int cc[128];
 	// OSC
-	Receiver mReceiver;
+	Receiver						mReceiver;
 	std::map<uint64_t, protocol::endpoint> mConnections;
-	ivec2	mCurrentCirclePos;
-	vec2	mCurrentSquarePos;
-	bool	mMouseDown = false;
+	ivec2							mCurrentCirclePos;
+	vec2							mCurrentSquarePos;
+	bool							mMouseDown = false;
 };
 
 
@@ -293,7 +285,7 @@ void SDAServerApp::draw()
 	//gl::setMatricesWindow(toPixels(getWindowSize()),false);
 	//gl::setMatricesWindow(getWindowSize());
 	gl::setMatricesWindow(mSDASettings->mRenderWidth, mSDASettings->mRenderHeight, false);
-	gl::draw(mSDASession->getMixTexture(), getWindowBounds());
+	//gl::draw(mSDASession->getMixTexture(), getWindowBounds());
 	gl::drawStrokedCircle(mCurrentCirclePos, 100);
 	gl::drawSolidRect(Rectf(mCurrentSquarePos - vec2(50), mCurrentSquarePos + vec2(50)));
 
