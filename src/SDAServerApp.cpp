@@ -36,7 +36,7 @@ using Receiver = osc::ReceiverTcp;
 using protocol = asio::ip::tcp;
 #endif
 
-const uint16_t localPort = 8088;
+const uint16_t localPort = 7000;
 
 class SDAServerApp : public App {
 
@@ -90,7 +90,7 @@ private:
 
 
 SDAServerApp::SDAServerApp()
-	: mSpoutOut("SDA", app::getWindowSize()),
+	: mSpoutOut("SDAServer", app::getWindowSize()),
 	mReceiver(localPort)
 {
 	// Settings
