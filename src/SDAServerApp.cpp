@@ -76,8 +76,8 @@ private:
 	// OSC
 	Receiver						mReceiver;
 	std::map<uint64_t, protocol::endpoint> mConnections;
-	ivec2							mCurrentCirclePos;
-	vec2							mCurrentSquarePos;
+	ivec2							mLeftHandPos;
+	vec2							mRightHandPos;
 	bool							mMouseDown = false;
 };
 
@@ -94,14 +94,22 @@ SDAServerApp::SDAServerApp()
 	setUIVisibility(mSDASettings->mCursorVisible);
 	mSDASession->getWindowsResolution();
 	// OSC
-	mReceiver.setListener("/mousemove/1",
+	mReceiver.setListener("/link/",
 		[&](const osc::Message &msg) {
-		mCurrentCirclePos.x = msg[0].int32();
-		mCurrentCirclePos.y = msg[1].int32();
+		float bpm = (float)msg[0].dbl();
+		float beat = (float)msg[1].dbl();
+		float phase = (float)msg[2].dbl();
+		stringstream sParams;
+		sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->IBPM) << ",\"value\":" << toString(bpm);
+		sParams << "},{\"name\":" << toString(mSDASettings->ITIME) << ",\"value\":" << toString(beat);
+		sParams << "},{\"name\":" << toString(mSDASettings->IPHASE) << ",\"value\":" << toString(phase) << "}]}";
+		mSDASession->wsWrite(sParams.str());
+		CI_LOG_W(sParams.str());
+
 	});
 	mReceiver.setListener("/mouseclick/1",
 		[&](const osc::Message &msg) {
-		mCurrentSquarePos = vec2(msg[0].flt(), msg[1].flt()) * vec2(getWindowSize());
+		mRightHandPos = vec2(msg[0].flt(), msg[1].flt()) * vec2(getWindowSize());
 	});
 	// ? is body 0 to 5 
 	mReceiver.setListener("/?/*",
@@ -109,20 +117,20 @@ SDAServerApp::SDAServerApp()
 		if (message[3].string() == "HandR") {
 			float xHandR = message[0].flt();
 			float yHandR = message[1].flt();
-			mCurrentSquarePos = vec2(xHandR * getWindowWidth() + getWindowWidth() / 2, yHandR * getWindowHeight() + getWindowHeight() / 2);
+			mRightHandPos = vec2(xHandR * getWindowWidth() + getWindowWidth() / 2, yHandR * getWindowHeight() + getWindowHeight() / 2);
 			stringstream sParams;
-			sParams << "{\"params\" :[{\"name\":110,\"value\":" << toString(xHandR);
-			sParams << "},{\"name\":111,\"value\":" << toString(yHandR) << "}]}";
+			sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->IRHANDX) << ",\"value\":" << toString(xHandR);
+			sParams << "},{\"name\":" << toString(mSDASettings->IRHANDY) << ",\"value\":" << toString(yHandR) << "}]}";
 			mSDASession->wsWrite(sParams.str());
 			CI_LOG_W(sParams.str());
 		}
 		if (message[3].string() == "HandL") {
 			float xHandL = message[0].flt();
 			float yHandL = message[1].flt();
-			mCurrentCirclePos = vec2(xHandL * getWindowWidth() + getWindowWidth() / 2, yHandL * getWindowHeight() + getWindowHeight() / 2);
+			mLeftHandPos = vec2(xHandL * getWindowWidth() + getWindowWidth() / 2, yHandL * getWindowHeight() + getWindowHeight() / 2);
 			stringstream sParams;
-			sParams << "{\"params\" :[{\"name\":112,\"value\":" << toString(xHandL);
-			sParams << "},{\"name\":113,\"value\":" << toString(yHandL) << "}]}";
+			sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->ILHANDX) << ",\"value\":" << toString(xHandL);
+			sParams << "},{\"name\":" << toString(mSDASettings->ILHANDY) << ",\"value\":" << toString(yHandL) << "}]}";
 			mSDASession->wsWrite(sParams.str());
 			CI_LOG_W(sParams.str());
 		}
@@ -268,8 +276,8 @@ void SDAServerApp::draw()
 	//gl::setMatricesWindow(getWindowSize());
 	gl::setMatricesWindow(mSDASettings->mRenderWidth, mSDASettings->mRenderHeight, false);
 	//gl::draw(mSDASession->getMixTexture(), getWindowBounds());
-	gl::drawStrokedCircle(mCurrentCirclePos, 100);
-	gl::drawSolidRect(Rectf(mCurrentSquarePos - vec2(50), mCurrentSquarePos + vec2(50)));
+	gl::drawStrokedCircle(mLeftHandPos, 100);
+	gl::drawSolidRect(Rectf(mRightHandPos - vec2(50), mRightHandPos + vec2(50)));
 
 	// Spout Send
 	mSpoutOut.sendViewport();
