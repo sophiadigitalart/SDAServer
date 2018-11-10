@@ -208,7 +208,9 @@
     <Xml Include="build\Win32\Debug\SDASettings.xml" />
     <Xml Include="build\Win32\Release\SDASettings.xml" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\assets\uniforms.json" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\..\..\Cinder\blocks\Cinder-ImGui\include\CinderImGui.h" />

@@ -76,6 +76,14 @@ private:
 	// OSC
 	Receiver						mReceiver;
 	std::map<uint64_t, protocol::endpoint> mConnections;
+	// kinect
+	string jointNames[26] = { "SpineBase", "SpineMid", "Neck", "Head",
+		"ShldrL", "ElbowL", "WristL", "HandL",
+		"ShldrR", "ElbowR", "WristR", "HandR",
+		"HipL", "KneeL", "AnkleL", "FootL",
+		"HipR", "KneeR", "AnkleR", "FootR",
+		"SpineShldr", "HandTipL", "ThumbL", "HandTipR", "ThumbR", "Count" };
+
 	ivec2							mLeftHandPos;
 	vec2							mRightHandPos;
 	bool							mMouseDown = false;
@@ -95,10 +103,10 @@ SDAServerApp::SDAServerApp()
 	mSDASession->getWindowsResolution();
 	// OSC
 	mReceiver.setListener("/link/",
-		[&](const osc::Message &msg) {
-		float bpm = (float)msg[0].dbl();
-		float beat = (float)msg[1].dbl();
-		float phase = (float)msg[2].dbl();
+		[&](const osc::Message &message) {
+		float bpm = (float)message[0].dbl();
+		float beat = (float)message[1].dbl();
+		float phase = (float)message[2].dbl();
 		stringstream sParams;
 		sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->IBPM) << ",\"value\":" << toString(bpm);
 		sParams << "},{\"name\":" << toString(mSDASettings->ITIME) << ",\"value\":" << toString(beat);
@@ -108,32 +116,60 @@ SDAServerApp::SDAServerApp()
 
 	});
 	mReceiver.setListener("/mouseclick/1",
-		[&](const osc::Message &msg) {
-		mRightHandPos = vec2(msg[0].flt(), msg[1].flt()) * vec2(getWindowSize());
+		[&](const osc::Message &message) {
+		mRightHandPos = vec2(message[0].flt(), message[1].flt()) * vec2(getWindowSize());
 	});
+	mReceiver.setListener("/kV2/body/?",
+		[&](const osc::Message &message) {
+		CI_LOG_W(message[0]);
+	});
+	mReceiver.setListener("/kv2status",
+		[&](const osc::Message &message) {
+		CI_LOG_W(message[0]);
+		mSDASession->wsWrite(message[0].string());
+
+	});
+
 	// ? is body 0 to 5 
 	mReceiver.setListener("/?/*",
 		[&](const osc::Message &message) {
-		if (message[3].string() == "HandR") {
+		float x = message[0].flt();
+		float y = message[1].flt();
+		float z = message[2].flt();
+		int jointIndex = message[3].int32() + 200;
+		int bodyIndex = message[4].int32();
+		string jointName = message[5].string();
+		stringstream sParams;
+		sParams << "{\"k2\" :[{\"name\":\"" << toString(jointIndex) << "\",\"value\":\"" << toString(x) << "," << toString(y) << "," << toString(z) << "," << toString(bodyIndex) << "\"}]}";
+		mSDASession->wsWrite(sParams.str());
+		CI_LOG_W(sParams.str());
+
+		//if (jointName == "HandR") {
+		/*if (jointIndex == 11) {
 			float xHandR = message[0].flt();
 			float yHandR = message[1].flt();
+			float zHandR = message[2].flt();
 			mRightHandPos = vec2(xHandR * getWindowWidth() + getWindowWidth() / 2, yHandR * getWindowHeight() + getWindowHeight() / 2);
 			stringstream sParams;
 			sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->IRHANDX) << ",\"value\":" << toString(xHandR);
-			sParams << "},{\"name\":" << toString(mSDASettings->IRHANDY) << ",\"value\":" << toString(yHandR) << "}]}";
+			sParams << "},{\"name\":" << toString(mSDASettings->IRHANDY) << ",\"value\":" << toString(yHandR);
+			sParams << "},{\"name\":" << toString(mSDASettings->IRHANDZ) << ",\"value\":" << toString(zHandR) << "}]}";
 			mSDASession->wsWrite(sParams.str());
 			CI_LOG_W(sParams.str());
 		}
-		if (message[3].string() == "HandL") {
+		//if (jointName == "HandL") {
+		if (jointIndex == 7) {
 			float xHandL = message[0].flt();
 			float yHandL = message[1].flt();
+			float zHandL = message[2].flt();
 			mLeftHandPos = vec2(xHandL * getWindowWidth() + getWindowWidth() / 2, yHandL * getWindowHeight() + getWindowHeight() / 2);
 			stringstream sParams;
 			sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->ILHANDX) << ",\"value\":" << toString(xHandL);
-			sParams << "},{\"name\":" << toString(mSDASettings->ILHANDY) << ",\"value\":" << toString(yHandL) << "}]}";
+			sParams << "},{\"name\":" << toString(mSDASettings->ILHANDY) << ",\"value\":" << toString(yHandL);
+			sParams << "},{\"name\":" << toString(mSDASettings->ILHANDZ) << ",\"value\":" << toString(zHandL) << "}]}";
 			mSDASession->wsWrite(sParams.str());
 			CI_LOG_W(sParams.str());
-		}
+		} */
 	});
 	try {
 		// Bind the receiver to the endpoint. This function may throw.
@@ -277,6 +313,7 @@ void SDAServerApp::draw()
 	gl::setMatricesWindow(mSDASettings->mRenderWidth, mSDASettings->mRenderHeight, false);
 	//gl::draw(mSDASession->getMixTexture(), getWindowBounds());
 	gl::drawStrokedCircle(mLeftHandPos, 100);
+	gl::drawStrokedCircle(mRightHandPos, 100);
 	gl::drawSolidRect(Rectf(mRightHandPos - vec2(50), mRightHandPos + vec2(50)));
 
 	// Spout Send

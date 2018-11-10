@@ -279,4 +279,9 @@
       <Filter>release</Filter>
     </Xml>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\assets\uniforms.json">
+      <Filter>assets</Filter>
+    </None>
+  </ItemGroup>
 </Project>
