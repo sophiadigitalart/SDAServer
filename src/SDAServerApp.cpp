@@ -77,13 +77,13 @@ private:
 	Receiver						mReceiver;
 	std::map<uint64_t, protocol::endpoint> mConnections;
 	// kinect
-	string jointNames[26] = { "SpineBase", "SpineMid", "Neck", "Head",
+	/*string jointNames[26] = { "SpineBase", "SpineMid", "Neck", "Head",
 		"ShldrL", "ElbowL", "WristL", "HandL",
 		"ShldrR", "ElbowR", "WristR", "HandR",
 		"HipL", "KneeL", "AnkleL", "FootL",
 		"HipR", "KneeR", "AnkleR", "FootR",
-		"SpineShldr", "HandTipL", "ThumbL", "HandTipR", "ThumbR", "Count" };
-
+		"SpineShldr", "HandTipL", "ThumbL", "HandTipR", "ThumbR", "Count" };*/
+	map<int, vec4>					mJoints;
 	ivec2							mLeftHandPos;
 	vec2							mRightHandPos;
 	bool							mMouseDown = false;
@@ -142,34 +142,10 @@ SDAServerApp::SDAServerApp()
 		stringstream sParams;
 		sParams << "{\"k2\" :[{\"name\":\"" << toString(jointIndex) << "\",\"value\":\"" << toString(x) << "," << toString(y) << "," << toString(z) << "," << toString(bodyIndex) << "\"}]}";
 		mSDASession->wsWrite(sParams.str());
-		CI_LOG_W(sParams.str());
-
-		//if (jointName == "HandR") {
-		/*if (jointIndex == 11) {
-			float xHandR = message[0].flt();
-			float yHandR = message[1].flt();
-			float zHandR = message[2].flt();
-			mRightHandPos = vec2(xHandR * getWindowWidth() + getWindowWidth() / 2, yHandR * getWindowHeight() + getWindowHeight() / 2);
-			stringstream sParams;
-			sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->IRHANDX) << ",\"value\":" << toString(xHandR);
-			sParams << "},{\"name\":" << toString(mSDASettings->IRHANDY) << ",\"value\":" << toString(yHandR);
-			sParams << "},{\"name\":" << toString(mSDASettings->IRHANDZ) << ",\"value\":" << toString(zHandR) << "}]}";
-			mSDASession->wsWrite(sParams.str());
-			CI_LOG_W(sParams.str());
-		}
-		//if (jointName == "HandL") {
-		if (jointIndex == 7) {
-			float xHandL = message[0].flt();
-			float yHandL = message[1].flt();
-			float zHandL = message[2].flt();
-			mLeftHandPos = vec2(xHandL * getWindowWidth() + getWindowWidth() / 2, yHandL * getWindowHeight() + getWindowHeight() / 2);
-			stringstream sParams;
-			sParams << "{\"params\" :[{\"name\":" << toString(mSDASettings->ILHANDX) << ",\"value\":" << toString(xHandL);
-			sParams << "},{\"name\":" << toString(mSDASettings->ILHANDY) << ",\"value\":" << toString(yHandL);
-			sParams << "},{\"name\":" << toString(mSDASettings->ILHANDZ) << ",\"value\":" << toString(zHandL) << "}]}";
-			mSDASession->wsWrite(sParams.str());
-			CI_LOG_W(sParams.str());
-		} */
+		if (jointIndex == 211) CI_LOG_W(sParams.str());
+		mJoints[message[3].int32()] = vec4(x * getWindowWidth() + getWindowWidth() / 2, 
+			y * getWindowHeight() + getWindowHeight() / 2, z, bodyIndex);
+		
 	});
 	try {
 		// Bind the receiver to the endpoint. This function may throw.
@@ -312,10 +288,15 @@ void SDAServerApp::draw()
 	//gl::setMatricesWindow(getWindowSize());
 	gl::setMatricesWindow(mSDASettings->mRenderWidth, mSDASettings->mRenderHeight, false);
 	//gl::draw(mSDASession->getMixTexture(), getWindowBounds());
-	gl::drawStrokedCircle(mLeftHandPos, 100);
-	gl::drawStrokedCircle(mRightHandPos, 100);
-	gl::drawSolidRect(Rectf(mRightHandPos - vec2(50), mRightHandPos + vec2(50)));
-
+	//gl::drawStrokedCircle(mLeftHandPos, 100);
+	//gl::drawStrokedCircle(mRightHandPos, 100);
+	//gl::drawSolidRect(Rectf(mRightHandPos - vec2(50), mRightHandPos + vec2(50)));
+	//mRightHandPos = vec2(xHandR * getWindowWidth() + getWindowWidth() / 2, yHandR * getWindowHeight() + getWindowHeight() / 2);
+	
+	for (unsigned i = 0; i < mJoints.size(); ++i) 
+	{		
+		gl::drawSolidCircle(mJoints[i], 10);
+	}
 	// Spout Send
 	mSpoutOut.sendViewport();
 	getWindow()->setTitle(mSDASettings->sFps + " fps SDAServer");
